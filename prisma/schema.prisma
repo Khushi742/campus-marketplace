@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  emailVerified DateTime?
+  usn          String?   @unique
+  degree       String?
+  branch       String?
+  passwordHash String
+  bio          String?
+  campus       String?
+  avatar       String?
+  phone        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  listings     Listing[] @relation("SellerListings")
+  favorites    Favorite[]
+  emailVerificationToken EmailVerificationToken?
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Listing {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  category    String
+  condition   String
+  location    String
+  latitude    Float?
+  longitude   Float?
+  imageUrls   String[]
+  status      ListingStatus @default(ACTIVE)
+  sellerId    String
+  seller      User          @relation("SellerListings", fields: [sellerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  favorites   Favorite[]
+}
+
+model Favorite {
+  id        String  @id @default(cuid())
+  userId    String
+  listingId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD
+}

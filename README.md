@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Campus Marketplace
 
-## Getting Started
+## Local setup
 
-First, run the development server:
+1. Copy `.env.example` to `.env.local` and fill in the required values.
+2. Ensure PostgreSQL is running and `DATABASE_URL` points to the database.
+3. Apply migrations and generate Prisma Client:
+
+   ```bash
+   npx prisma migrate deploy
+   npx prisma generate
+   ```
+
+4. Install packages and start the app:
+
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+## Email verification
+
+Account creation requires an `@nmit.ac.in` address. Resend sends a single-use verification link that expires after one hour. Configure `RESEND_API_KEY` and `EMAIL_FROM` with a sender address verified in Resend, and set `NEXTAUTH_URL` to the exact app origin used in email links (HTTPS outside local development). Unverified accounts cannot sign in.
+
+Never commit `.env.local` or expose provider keys in client-side variables.
+
+## Checks
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm test
+npm run lint
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Vercel deployment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Link the project with the Vercel CLI or Vercel dashboard, configure all variables from `.env.example` in the Production environment, and use a reachable PostgreSQL database. Apply migrations against that database before directing traffic:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npx prisma migrate deploy
+npm run build
+```
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The initial migration is for a new database. For an existing database created outside Prisma Migrate, inspect and baseline its actual schema before applying migrations; do not run the initial migration against existing tables.

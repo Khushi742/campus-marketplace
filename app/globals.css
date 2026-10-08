@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5efdf;
+  --foreground: #10243e;
+  --primary: #102f59;
+  --secondary: #31577d;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --muted: #64758a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-indigo-50: #e5edf4;
+  --color-indigo-100: #d2e0ec;
+  --color-indigo-200: #b5cadc;
+  --color-indigo-300: #8ba9c4;
+  --color-indigo-400: #5d82a6;
+  --color-indigo-500: #1d4774;
+  --color-indigo-600: #102f59;
+  --color-indigo-700: #173d67;
+  --color-indigo-800: #102d4f;
+  --color-violet-100: #e3eaf0;
+  --color-violet-200: #cad8e5;
+  --color-violet-500: #31577d;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(ellipse at 12% 8%, rgba(194, 211, 225, 0.66), transparent 34rem),
+    radial-gradient(ellipse at 88% 26%, rgba(255, 255, 255, 0.72), transparent 30rem),
+    var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.bg-white {
+  background-color: rgba(255, 252, 244, 0.76);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.bg-slate-50 {
+  background-color: rgba(245, 239, 223, 0.68);
+}
+
+.bg-indigo-600 {
+  background-color: #102f59;
+}
+
+.bg-indigo-500 {
+  background-color: #1d4774;
+}
+
+.bg-indigo-50 {
+  background-color: rgba(211, 224, 235, 0.68);
+}
+
+.bg-indigo-100 {
+  background-color: rgba(196, 214, 230, 0.78);
+}
+
+.text-indigo-600,
+.text-indigo-700 {
+  color: #173d67;
+}
+
+.text-slate-900 {
+  color: #10243e;
+}
+
+.text-slate-700 {
+  color: #334c68;
+}
+
+.text-slate-600,
+.text-slate-500 {
+  color: #64758a;
+}
+
+.border-slate-200 {
+  border-color: rgba(30, 60, 91, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+input, select, textarea, button {
+  font: inherit;
+}
+
+.container-shell {
+  width: min(1200px, calc(100vw - 2rem));
+  margin-inline: auto;
 }
