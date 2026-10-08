@@ -3,15 +3,23 @@
 ## Local setup
 
 1. Copy `.env.example` to `.env.local` and fill in the required values.
-2. Ensure PostgreSQL is running and `DATABASE_URL` points to the database.
-3. Apply migrations and generate Prisma Client:
+2. In Supabase, open **Connect** and configure:
+   - `DATABASE_URL` with the **Transaction Pooler** URI (port `6543`) for the app's
+     serverless Prisma Client connections.
+   - `DIRECT_URL` with the **Session Pooler** URI (port `5432`) for Prisma CLI
+     migrations when the local network cannot reach the IPv6 direct endpoint.
+     The Direct connection URI also works when the environment supports IPv6.
+3. Prisma CLI reads `.env` in this project. Before running Prisma CLI commands,
+   make sure both database variables are available there; keep `.env` and
+   `.env.local` out of version control.
+4. Apply migrations and generate Prisma Client:
 
    ```bash
    npx prisma migrate deploy
    npx prisma generate
    ```
 
-4. Install packages and start the app:
+5. Install packages and start the app:
 
    ```bash
    npm install
@@ -34,7 +42,10 @@ npm run build
 
 ## Vercel deployment
 
-Link the project with the Vercel CLI or Vercel dashboard, configure all variables from `.env.example` in the Production environment, and use a reachable PostgreSQL database. Apply migrations against that database before directing traffic:
+Link the project with the Vercel dashboard and configure the production
+environment variables from `.env.example`. Use Supabase's Transaction Pooler
+URI for `DATABASE_URL`, and a reachable Direct or Session Pooler URI for
+`DIRECT_URL`. Apply migrations against that database before directing traffic:
 
 ```bash
 npx prisma migrate deploy
