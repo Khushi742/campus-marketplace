@@ -6,7 +6,10 @@ import { getPrisma } from "@/lib/db";
 export async function GET() {
   const prisma = await getPrisma();
   const listings = await prisma.listing.findMany({
-    include: { seller: true },
+    where: { status: "ACTIVE" },
+    include: {
+      seller: { select: { id: true, name: true, branch: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
 

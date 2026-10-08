@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { GraduationCap, Heart } from "lucide-react";
-import { landingMockListings } from "@/lib/sample-data";
 import { formatCurrency } from "@/lib/currency";
 import { formatListingAge } from "@/lib/listing-age";
 import { getWishlistIds, WISHLIST_CHANGE_EVENT } from "@/lib/wishlist";
@@ -11,10 +10,26 @@ import WishlistButton from "@/components/WishlistButton";
 
 export default function WishlistItems() {
   const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [listings, setListings] = useState<Array<{
+    id: string;
+    title: string;
+    price: number;
+    category: string;
+    imageUrls: string[];
+    createdAt: string;
+    seller: { branch: string | null };
+  }>>([]);
 
   useEffect(() => {
     const syncWishlist = () => setSavedIds(getWishlistIds());
     syncWishlist();
+    fetch("/api/listings")
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Could not load marketplace listings.");
+        const result = await response.json();
+        setListings(result.map((listing: { createdAt: string }) => listing));
+      })
+      .catch((error: unknown) => console.error("Could not load wishlist listings:", error));
     window.addEventListener(WISHLIST_CHANGE_EVENT, syncWishlist);
     window.addEventListener("storage", syncWishlist);
     return () => {
@@ -23,7 +38,7 @@ export default function WishlistItems() {
     };
   }, []);
 
-  const savedListings = landingMockListings.filter((listing) => savedIds.includes(listing.id));
+  const savedListings = listings.filter((listing) => savedIds.includes(listing.id));
 
   if (savedListings.length === 0) {
     return (
@@ -58,7 +73,7 @@ export default function WishlistItems() {
               <span className="text-xl font-black text-slate-900">{formatCurrency(listing.price)}</span>
             </div>
             <Link href={`/listing/${listing.id}`} className="text-xl font-bold text-slate-900 hover:text-indigo-700">{listing.title}</Link>
-            <div className="mt-3 flex items-center gap-2 text-sm text-slate-500"><GraduationCap className="h-4 w-4 text-indigo-600" /> {listing.seller.branch}</div>
+            <div className="mt-3 flex items-center gap-2 text-sm text-slate-500"><GraduationCap className="h-4 w-4 text-indigo-600" /> {listing.seller.branch ?? "Engineering student"}</div>
             <p className="mt-3 text-xs font-medium text-slate-500">{formatListingAge(listing.createdAt)}</p>
           </div>
         </article>

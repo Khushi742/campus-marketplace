@@ -36,6 +36,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   const body = await request.json();
+  if (body.status !== undefined && body.status !== "ACTIVE" && body.status !== "SOLD") {
+    return NextResponse.json({ error: "Status must be ACTIVE or SOLD." }, { status: 400 });
+  }
   const updated = await prisma.listing.update({
     where: { id },
     data: {
@@ -46,6 +49,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       condition: body.condition,
       location: body.location,
       imageUrls: Array.isArray(body.imageUrls) ? body.imageUrls : undefined,
+      status: body.status,
     },
   });
 

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, BookOpen, Bike, BriefcaseBusiness, ChevronRight, GraduationCap, MapPin, ShieldCheck, ShoppingBag, Sparkles, Tag, Truck } from "lucide-react";
-import { categories, landingMockListings } from "@/lib/sample-data";
+import { categories } from "@/lib/sample-data";
 import { formatCurrency } from "@/lib/currency";
 import { formatListingAge } from "@/lib/listing-age";
+import { getPrisma } from "@/lib/db";
 
 const features = [
   {
@@ -33,7 +34,16 @@ const steps = [
   "Connect with buyers",
 ];
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const trendingListings = await (await getPrisma()).listing.findMany({
+    where: { status: "ACTIVE" },
+    include: { seller: { select: { name: true, branch: true } } },
+    orderBy: { createdAt: "desc" },
+    take: 3,
+  });
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
@@ -184,7 +194,7 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
-            {landingMockListings.map((listing) => (
+            {trendingListings.map((listing) => (
               <article key={listing.id} className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
                 <img src={listing.imageUrls[0]} alt={listing.title} className="h-60 w-full object-cover" />
                 <div className="p-5">
@@ -197,7 +207,7 @@ export default function HomePage() {
                     <GraduationCap className="h-4 w-4 text-indigo-600" />
                     {listing.seller.branch}
                   </div>
-                  <p className="mt-2 text-xs font-medium text-slate-500">{formatListingAge(listing.createdAt)}</p>
+                  <p className="mt-2 text-xs font-medium text-slate-500">{formatListingAge(listing.createdAt.toISOString())}</p>
                   <div className="mt-5 flex items-center justify-between">
                     <span className="text-sm text-slate-500">By {listing.seller.name}</span>
                     <Link href={`/listing/${listing.id}`} className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600">
@@ -208,6 +218,11 @@ export default function HomePage() {
               </article>
             ))}
           </div>
+          {trendingListings.length === 0 ? (
+            <div className="rounded-[28px] border border-slate-200 bg-white p-8 text-center text-slate-600">
+              No active listings yet. <Link href="/create" className="font-semibold text-indigo-700">Be the first to list an item.</Link>
+            </div>
+          ) : null}
         </section>
 
         <section className="bg-white py-16">

@@ -3,12 +3,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import { GraduationCap, SlidersHorizontal } from "lucide-react";
-import type { landingMockListings } from "@/lib/sample-data";
 import { formatCurrency } from "@/lib/currency";
 import { formatListingAge } from "@/lib/listing-age";
 import WishlistButton from "@/components/WishlistButton";
 
-type MarketplaceListing = (typeof landingMockListings)[number];
+type MarketplaceListing = {
+  id: string;
+  title: string;
+  price: number;
+  category: string;
+  imageUrls: string[];
+  createdAt: string;
+  seller: { id: string; name: string; branch: string | null };
+};
 
 export default function MarketplaceResults({
   listings,

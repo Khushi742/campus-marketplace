@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { categories, landingMockListings } from "@/lib/sample-data";
+import { categories } from "@/lib/sample-data";
 import MarketplaceResults from "./MarketplaceResults";
+import { getPrisma } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 
 export default async function MarketplacePage({
   searchParams,
@@ -10,9 +13,13 @@ export default async function MarketplacePage({
 }) {
   const { category: requestedCategory } = await searchParams;
   const activeCategory = categories.find((category) => category === requestedCategory) ?? null;
-  const filteredListings = activeCategory
-    ? landingMockListings.filter((listing) => listing.category === activeCategory)
-    : landingMockListings;
+  const filteredListings = await (await getPrisma()).listing.findMany({
+    where: { status: "ACTIVE", ...(activeCategory ? { category: activeCategory } : {}) },
+    include: {
+      seller: { select: { id: true, name: true, email: true, usn: true, degree: true, branch: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <div className="container-shell py-12">
@@ -49,7 +56,10 @@ export default async function MarketplacePage({
         ))}
       </nav>
 
-      <MarketplaceResults key={activeCategory ?? "all"} listings={filteredListings} />
+      <MarketplaceResults key={activeCategory ?? "all"} listings={filteredListings.map((listing) => ({
+        ...listing,
+        createdAt: listing.createdAt.toISOString(),
+      }))} />
     </div>
   );
 }

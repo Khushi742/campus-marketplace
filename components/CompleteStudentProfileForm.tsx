@@ -65,11 +65,11 @@ export default function CompleteStudentProfileForm({ user }: { user: StudentProf
               type="text"
               required
               pattern="[A-Za-z]{2}[0-9]{2}[A-Za-z]{2,4}[0-9]{3}"
-              title="Use the format NB25ISE111"
+              title="Enter your NMIT student USN."
               maxLength={11}
               defaultValue={user.usn ?? ""}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 uppercase outline-none transition focus:border-indigo-400 focus:bg-white"
-              placeholder="NB25ISE111"
+              placeholder="Your student USN"
             />
           </div>
           <div className="grid gap-5 sm:grid-cols-2">

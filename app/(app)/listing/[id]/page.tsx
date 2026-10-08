@@ -1,10 +1,14 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth/next";
 import { ArrowLeft, Check, GraduationCap, PackageCheck, ShieldCheck } from "lucide-react";
-import { landingMockListings } from "@/lib/sample-data";
+import { authOptions } from "@/auth";
+import { getPrisma } from "@/lib/db";
 import { formatCurrency } from "@/lib/currency";
 import { formatListingAge } from "@/lib/listing-age";
 import SellerContactButton from "./SellerContactButton";
 import WishlistButton from "@/components/WishlistButton";
+import SellerRatingForm from "./SellerRatingForm";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +18,26 @@ export default async function ListingDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const listing = landingMockListings.find((item) => item.id === id) ?? landingMockListings[0];
+  const prisma = await getPrisma();
+  const [listing, session] = await Promise.all([
+    prisma.listing.findUnique({
+      where: { id },
+      include: {
+        seller: { select: { id: true, name: true, email: true, usn: true, degree: true, branch: true } },
+      },
+    }),
+    getServerSession(authOptions),
+  ]);
+  if (!listing) notFound();
+  const [ratingSummary, existingRating] = await Promise.all([
+    prisma.sellerRating.aggregate({ where: { sellerId: listing.sellerId }, _avg: { rating: true }, _count: true }),
+    session?.user?.id
+      ? prisma.sellerRating.findUnique({
+          where: { sellerId_reviewerId: { sellerId: listing.sellerId, reviewerId: session.user.id } },
+          select: { rating: true },
+        })
+      : Promise.resolve(null),
+  ]);
 
   return (
     <div className="container-shell py-8 md:py-12">
@@ -51,7 +74,7 @@ export default async function ListingDetailPage({
           <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm md:p-7">
             <p className="text-sm font-medium text-slate-500">Asking price</p>
             <div className="mt-1 text-4xl font-black tracking-tight text-slate-900">{formatCurrency(listing.price)}</div>
-            <p className="mt-2 text-sm font-medium text-slate-500">{formatListingAge(listing.createdAt)}</p>
+            <p className="mt-2 text-sm font-medium text-slate-500">{formatListingAge(listing.createdAt.toISOString())}</p>
             <div className="mt-5 flex items-start gap-3 rounded-2xl bg-slate-50 p-4">
               <PackageCheck className="mt-0.5 h-5 w-5 shrink-0 text-indigo-700" />
               <div>
@@ -60,7 +83,7 @@ export default async function ListingDetailPage({
               </div>
             </div>
             <div className="mt-6 space-y-3">
-              <SellerContactButton seller={listing.seller} />
+              <SellerContactButton seller={{ ...listing.seller, branch: listing.seller.branch ?? "Engineering student" }} />
               <WishlistButton
                 listingId={listing.id}
                 listingTitle={listing.title}
@@ -82,12 +105,23 @@ export default async function ListingDetailPage({
               </div>
               <div>
                 <p className="font-bold text-slate-900">{listing.seller.name}</p>
-                <p className="text-sm text-slate-500">USN: {listing.seller.usn}</p>
+                {listing.seller.usn ? <p className="text-sm text-slate-500">USN: {listing.seller.usn}</p> : null}
               </div>
             </div>
             <div className="mt-4 flex items-start gap-2 border-t border-slate-200 pt-4 text-sm leading-6 text-slate-600">
               <GraduationCap className="mt-0.5 h-4 w-4 shrink-0 text-indigo-700" />
-              <span>{listing.seller.degree} · {listing.seller.branch}</span>
+              <span>{[listing.seller.degree, listing.seller.branch].filter(Boolean).join(" · ") || "NMIT student"}</span>
+            </div>
+            <div className="mt-4 border-t border-slate-200 pt-4">
+              <p className="font-semibold text-slate-900">
+                Seller rating: {ratingSummary._avg.rating?.toFixed(1) ?? "Not rated"}
+                {ratingSummary._count ? <span className="ml-2 text-sm font-normal text-slate-500">({ratingSummary._count})</span> : null}
+              </p>
+              <SellerRatingForm
+                sellerId={listing.sellerId}
+                currentRating={existingRating?.rating ?? null}
+                canRate={Boolean(session?.user?.id) && session?.user?.id !== listing.sellerId}
+              />
             </div>
           </section>
         </aside>

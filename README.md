@@ -52,6 +52,15 @@ Sign-in and account creation use Google OAuth; verification emails are not sent.
 
 The callback checks both Google's verified-email claim and the exact `@nmit.ac.in` domain; a Google account with another domain cannot create or sign into an account.
 
+## Marketplace listings and seller ratings
+
+Marketplace, seller dashboard, listing details, profile, and wishlist entries use
+the live database rather than demo student/listing data. A signed-in student can
+rate another seller from a listing page on a 1–5 scale and update their rating
+later. Self-ratings are rejected, and each reviewer has one rating per seller.
+Run `npx prisma migrate deploy` when setting up or updating the database to add
+the seller-rating table.
+
 Configure `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and
 `CLOUDINARY_API_SECRET` to enable persistent listing image uploads. Without
 Cloudinary configuration, image upload requests use their provided source URL

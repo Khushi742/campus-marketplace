@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   const degree = typeof values.degree === "string" ? values.degree.trim() : "";
   const branch = typeof values.branch === "string" ? values.branch.trim() : "";
   if (!isValidUsn(usn)) {
-    return NextResponse.json({ error: "Enter a valid USN, for example NB25ISE111." }, { status: 400 });
+    return NextResponse.json({ error: "Enter a valid NMIT student USN." }, { status: 400 });
   }
   if (!engineeringDegrees.some((allowed) => allowed === degree)) {
     return NextResponse.json({ error: "Degree must be BE or BTech." }, { status: 400 });

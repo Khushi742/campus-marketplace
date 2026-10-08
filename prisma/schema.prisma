@@ -9,22 +9,24 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  name         String
-  email        String    @unique
-  emailVerified DateTime?
-  usn          String?   @unique
-  degree       String?
-  branch       String?
-  passwordHash String?
-  bio          String?
-  campus       String?
-  avatar       String?
-  phone        String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  listings     Listing[] @relation("SellerListings")
-  favorites    Favorite[]
+  id             String         @id @default(cuid())
+  name           String
+  email          String         @unique
+  emailVerified  DateTime?
+  usn            String?        @unique
+  degree         String?
+  branch         String?
+  passwordHash   String?
+  bio            String?
+  campus         String?
+  avatar         String?
+  phone          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  listings       Listing[]      @relation("SellerListings")
+  favorites      Favorite[]
+  sellerRatings  SellerRating[] @relation("ReceivedSellerRatings")
+  writtenRatings SellerRating[] @relation("WrittenSellerRatings")
 }
 
 model Listing {
@@ -54,6 +56,19 @@ model Favorite {
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@unique([userId, listingId])
+}
+
+model SellerRating {
+  id         String   @id @default(cuid())
+  sellerId   String
+  reviewerId String
+  rating     Int
+  createdAt  DateTime @default(now())
+  seller     User     @relation("ReceivedSellerRatings", fields: [sellerId], references: [id], onDelete: Cascade)
+  reviewer   User     @relation("WrittenSellerRatings", fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@unique([sellerId, reviewerId])
+  @@index([sellerId])
 }
 
 enum ListingStatus {
