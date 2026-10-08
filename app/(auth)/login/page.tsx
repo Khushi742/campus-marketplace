@@ -16,6 +16,7 @@ export default async function LoginPage({
     <LoginForm
       googleConfigured={Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)}
       errorNotice={errorNotice}
+      accessDenied={params.error === "AccessDenied"}
     />
   );
 }
