@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { GraduationCap, Mail, Phone, Star } from "lucide-react";
 import { authOptions } from "@/auth";
 import { getPrisma } from "@/lib/db";
+import ProfileIntroductionEditor from "./ProfileIntroductionEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ export default async function ProfilePage() {
 
         <div className="mt-8 rounded-[28px] border border-slate-200 bg-slate-50 p-6">
           <h2 className="text-xl font-bold text-slate-900">About</h2>
-          <p className="mt-3 text-sm leading-7 text-slate-600">{user.bio || "Add a short introduction to help other students get to know you."}</p>
+          <ProfileIntroductionEditor initialBio={user.bio ?? ""} />
           <div className="mt-6 space-y-3 text-sm text-slate-600">
             <div className="flex items-center gap-3"><Mail className="h-4 w-4 text-indigo-600" /> {user.email}</div>
             {user.degree || user.branch ? <div className="flex items-center gap-3"><GraduationCap className="h-4 w-4 text-indigo-600" /> {[user.degree, user.branch].filter(Boolean).join(" • ")}</div> : null}
