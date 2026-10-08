@@ -1,12 +1,10 @@
 import type { NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import bcrypt from "bcrypt";
+import GoogleProvider from "next-auth/providers/google";
 import { getPrisma } from "@/lib/db";
+import { isAllowedGoogleStudent, normalizeStudentEmail } from "@/lib/google-auth";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(undefined as never),
   session: {
     strategy: "jwt",
   },
@@ -14,48 +12,47 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
   providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        const prisma = await getPrisma();
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
-
-        const user = await prisma.user.findUnique({
-          where: { email: String(credentials.email).toLowerCase() },
-        });
-
-        if (!user) {
-          return null;
-        }
-
-        if (!user.emailVerified) {
-          return null;
-        }
-
-        const isValid = await bcrypt.compare(String(credentials.password), user.passwordHash);
-
-        if (!isValid) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        };
-      },
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      const email = normalizeStudentEmail(user.email);
+      const isGoogleEmailVerified =
+        profile !== undefined &&
+        "email_verified" in profile &&
+        profile.email_verified === true;
+      if (
+        account?.provider !== "google" ||
+        !isAllowedGoogleStudent(email, isGoogleEmailVerified)
+      ) {
+        return false;
+      }
+
+      const prisma = await getPrisma();
+      const now = new Date();
+      await prisma.user.upsert({
+        where: { email },
+        create: {
+          email,
+          name: user.name?.trim() || email.split("@")[0],
+          emailVerified: now,
+        },
+        update: { emailVerified: now },
+      });
+
+      return true;
+    },
     async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
+      if (user?.email) {
+        const email = normalizeStudentEmail(user.email);
+        const dbUser = await (await getPrisma()).user.findUnique({ where: { email } });
+        if (!dbUser) {
+          throw new Error("Google account has no matching Campus Marketplace user.");
+        }
+        token.id = dbUser.id;
       }
       return token;
     },

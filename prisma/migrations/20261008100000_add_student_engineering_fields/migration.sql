@@ -1,6 +1,6 @@
 ALTER TABLE "User"
-ADD COLUMN "usn" TEXT,
-ADD COLUMN "degree" TEXT,
-ADD COLUMN "branch" TEXT;
+ADD COLUMN IF NOT EXISTS "usn" TEXT,
+ADD COLUMN IF NOT EXISTS "degree" TEXT,
+ADD COLUMN IF NOT EXISTS "branch" TEXT;
 
-CREATE UNIQUE INDEX "User_usn_key" ON "User"("usn");
+CREATE UNIQUE INDEX IF NOT EXISTS "User_usn_key" ON "User"("usn");

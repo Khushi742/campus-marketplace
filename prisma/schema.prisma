@@ -16,7 +16,7 @@ model User {
   usn          String?   @unique
   degree       String?
   branch       String?
-  passwordHash String
+  passwordHash String?
   bio          String?
   campus       String?
   avatar       String?
@@ -25,16 +25,6 @@ model User {
   updatedAt    DateTime  @updatedAt
   listings     Listing[] @relation("SellerListings")
   favorites    Favorite[]
-  emailVerificationToken EmailVerificationToken?
-}
-
-model EmailVerificationToken {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
-  userId    String   @unique
-  expiresAt DateTime
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
 }
 
 model Listing {
