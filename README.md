@@ -52,6 +52,11 @@ Sign-in and account creation use Google OAuth; verification emails are not sent.
 
 The callback checks both Google's verified-email claim and the exact `@nmit.ac.in` domain; a Google account with another domain cannot create or sign into an account.
 
+Configure `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and
+`CLOUDINARY_API_SECRET` to enable persistent listing image uploads. Without
+Cloudinary configuration, image upload requests use their provided source URL
+instead of uploading a file.
+
 Never commit `.env.local` or expose provider keys in client-side variables.
 
 ## Checks
