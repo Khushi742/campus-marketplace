@@ -14,7 +14,7 @@ export default async function ProfilePage() {
   const [user, listingCount, soldCount, ratings] = await Promise.all([
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { name: true, email: true, usn: true, degree: true, branch: true, bio: true, phone: true },
+      select: { name: true, email: true, degree: true, branch: true, bio: true, phone: true },
     }),
     prisma.listing.count({ where: { sellerId: session.user.id } }),
     prisma.listing.count({ where: { sellerId: session.user.id, status: "SOLD" } }),
@@ -31,7 +31,6 @@ export default async function ProfilePage() {
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-violet-500 text-xl font-black text-white">{initials}</div>
             <div>
               <h1 className="text-3xl font-black tracking-tight text-slate-900">{user.name}</h1>
-              {user.usn ? <p className="mt-1 text-sm font-semibold tracking-wide text-indigo-700">USN: {user.usn}</p> : null}
             </div>
           </div>
         </div>

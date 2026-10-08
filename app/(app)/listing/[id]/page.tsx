@@ -23,7 +23,7 @@ export default async function ListingDetailPage({
     prisma.listing.findUnique({
       where: { id },
       include: {
-        seller: { select: { id: true, name: true, email: true, usn: true, degree: true, branch: true } },
+        seller: { select: { id: true, name: true, email: true, degree: true, branch: true } },
       },
     }),
     getServerSession(authOptions),
@@ -105,7 +105,6 @@ export default async function ListingDetailPage({
               </div>
               <div>
                 <p className="font-bold text-slate-900">{listing.seller.name}</p>
-                {listing.seller.usn ? <p className="text-sm text-slate-500">USN: {listing.seller.usn}</p> : null}
               </div>
             </div>
             <div className="mt-4 flex items-start gap-2 border-t border-slate-200 pt-4 text-sm leading-6 text-slate-600">
