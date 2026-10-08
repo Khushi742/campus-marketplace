@@ -49,6 +49,9 @@ export default async function ListingDetailPage({
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-indigo-700">{listing.category}</p>
         <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-900 md:text-4xl">{listing.title}</h1>
         <p className="mt-2 text-sm text-slate-500">Listed by {listing.seller.name}</p>
+        <span className={`mt-3 inline-flex rounded-full px-3 py-1 text-sm font-bold ${listing.status === "SOLD" ? "bg-rose-100 text-rose-800" : "bg-emerald-100 text-emerald-800"}`}>
+          {listing.status === "SOLD" ? "Sold" : "Available"}
+        </span>
       </div>
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.75fr)]">
@@ -78,18 +81,24 @@ export default async function ListingDetailPage({
             <div className="mt-5 flex items-start gap-3 rounded-2xl bg-slate-50 p-4">
               <PackageCheck className="mt-0.5 h-5 w-5 shrink-0 text-indigo-700" />
               <div>
-                <p className="font-semibold text-slate-800">Campus pickup</p>
-                <p className="mt-1 text-sm leading-6 text-slate-500">Message the seller to agree on a convenient campus meetup.</p>
+                <p className="font-semibold text-slate-800">{listing.status === "SOLD" ? "This item has been sold" : "Campus pickup"}</p>
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  {listing.status === "SOLD" ? "This item is no longer available." : "Message the seller to agree on a convenient campus meetup."}
+                </p>
               </div>
             </div>
             <div className="mt-6 space-y-3">
-              <SellerContactButton seller={{ ...listing.seller, branch: listing.seller.branch ?? "Engineering student" }} />
-              <WishlistButton
-                listingId={listing.id}
-                listingTitle={listing.title}
-                showLabel
-                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
-              />
+              {listing.status === "ACTIVE" ? (
+                <>
+                  <SellerContactButton seller={{ ...listing.seller, branch: listing.seller.branch ?? "Engineering student" }} />
+                  <WishlistButton
+                    listingId={listing.id}
+                    listingTitle={listing.title}
+                    showLabel
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+                  />
+                </>
+              ) : null}
             </div>
             <div className="mt-5 flex items-center gap-2 border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500">
               <ShieldCheck className="h-4 w-4 shrink-0 text-indigo-700" />

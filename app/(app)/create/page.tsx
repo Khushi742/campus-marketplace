@@ -100,11 +100,11 @@ export default function CreateListingPage() {
           <div className="grid gap-6 md:grid-cols-2">
             <div className="md:col-span-2">
               <label htmlFor="title" className="mb-2 block text-sm font-medium text-slate-700">Title</label>
-              <input id="title" name="title" required className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 outline-none transition focus:border-indigo-400 focus:bg-white" placeholder="Vintage desk lamp" />
+              <input id="title" name="title" required maxLength={120} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 outline-none transition focus:border-indigo-400 focus:bg-white" placeholder="Vintage desk lamp" />
             </div>
             <div className="md:col-span-2">
               <label htmlFor="description" className="mb-2 block text-sm font-medium text-slate-700">Description</label>
-              <textarea id="description" name="description" rows={5} required className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 outline-none transition focus:border-indigo-400 focus:bg-white" placeholder="Describe the item condition, specs, and pickup details." />
+              <textarea id="description" name="description" rows={5} required maxLength={5000} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 outline-none transition focus:border-indigo-400 focus:bg-white" placeholder="Describe the item condition, specs, and pickup details." />
             </div>
             <div>
               <label htmlFor="price" className="mb-2 block text-sm font-medium text-slate-700">Price (INR)</label>
@@ -127,7 +127,7 @@ export default function CreateListingPage() {
             </div>
             <div>
               <label htmlFor="location" className="mb-2 block text-sm font-medium text-slate-700">Campus/location</label>
-              <input id="location" name="location" required className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 outline-none transition focus:border-indigo-400 focus:bg-white" placeholder="North Residence Hall" />
+              <input id="location" name="location" required maxLength={200} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 outline-none transition focus:border-indigo-400 focus:bg-white" placeholder="North Residence Hall" />
             </div>
             <div className="md:col-span-2">
               <label htmlFor="imageFile" className="mb-2 block text-sm font-medium text-slate-700">Upload an image from your device</label>

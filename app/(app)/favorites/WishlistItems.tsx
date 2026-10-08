@@ -9,6 +9,9 @@ import { getWishlistIds, WISHLIST_CHANGE_EVENT } from "@/lib/wishlist";
 import WishlistButton from "@/components/WishlistButton";
 
 export default function WishlistItems() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [reload, setReload] = useState(0);
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [listings, setListings] = useState<Array<{
     id: string;
@@ -22,14 +25,30 @@ export default function WishlistItems() {
 
   useEffect(() => {
     const syncWishlist = () => setSavedIds(getWishlistIds());
-    syncWishlist();
+    const initialSync = window.setTimeout(syncWishlist, 0);
+    let isCurrentRequest = true;
     fetch("/api/listings")
       .then(async (response) => {
         if (!response.ok) throw new Error("Could not load marketplace listings.");
-        const result = await response.json();
-        setListings(result.map((listing: { createdAt: string }) => listing));
+        return response.json();
       })
-      .catch((error: unknown) => console.error("Could not load wishlist listings:", error));
+      .then((result: typeof listings) => {
+        if (isCurrentRequest) setListings(result);
+      })
+      .catch(() => {
+        if (isCurrentRequest) setError("Your wishlist couldn’t be loaded. Check your connection and try again.");
+      })
+      .finally(() => {
+        if (isCurrentRequest) setIsLoading(false);
+      });
+    return () => {
+      isCurrentRequest = false;
+      window.clearTimeout(initialSync);
+    };
+  }, [reload]);
+
+  useEffect(() => {
+    const syncWishlist = () => setSavedIds(getWishlistIds());
     window.addEventListener(WISHLIST_CHANGE_EVENT, syncWishlist);
     window.addEventListener("storage", syncWishlist);
     return () => {
@@ -39,6 +58,29 @@ export default function WishlistItems() {
   }, []);
 
   const savedListings = listings.filter((listing) => savedIds.includes(listing.id));
+
+  if (isLoading) {
+    return <div role="status" className="rounded-[28px] border border-slate-200 bg-white/75 p-10 text-center text-sm text-slate-600 shadow-sm">Loading your wishlist…</div>;
+  }
+
+  if (error) {
+    return (
+      <div role="alert" className="rounded-[28px] border border-red-200 bg-white p-10 text-center shadow-sm">
+        <p className="text-sm text-red-700">{error}</p>
+        <button
+          type="button"
+          onClick={() => {
+            setIsLoading(true);
+            setError("");
+            setReload((current) => current + 1);
+          }}
+          className="mt-5 rounded-full bg-indigo-600 px-5 py-3 text-sm font-semibold text-white"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   if (savedListings.length === 0) {
     return (

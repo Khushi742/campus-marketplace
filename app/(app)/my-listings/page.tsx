@@ -6,6 +6,7 @@ import { authOptions } from "@/auth";
 import { getPrisma } from "@/lib/db";
 import { formatCurrency } from "@/lib/currency";
 import MarkListingSoldButton from "./MarkListingSoldButton";
+import DeleteListingButton from "./DeleteListingButton";
 
 export const dynamic = "force-dynamic";
 
@@ -44,10 +45,15 @@ export default async function MyListingsPage() {
                 <span className="text-lg font-black text-slate-900">{formatCurrency(listing.price)}</span>
               </div>
               <h2 className="mt-4 text-xl font-bold text-slate-900">{listing.title}</h2>
-              <div className="mt-2 flex items-center gap-2 text-sm text-slate-500"><GraduationCap className="h-4 w-4 text-indigo-600" /> {listing.status === "SOLD" ? "Sold" : "Active"}</div>
-              <div className="mt-5 flex gap-3">
+              <div className="mt-2 flex items-center gap-2 text-sm text-slate-500"><GraduationCap className="h-4 w-4 text-indigo-600" />
+                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${listing.status === "SOLD" ? "bg-rose-100 text-rose-800" : "bg-emerald-100 text-emerald-800"}`}>
+                  {listing.status === "SOLD" ? "Sold" : "Available"}
+                </span>
+              </div>
+              <div className="mt-5 flex flex-wrap gap-3">
                 <Link href={`/edit/${listing.id}`} className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100">Edit</Link>
                 {listing.status === "ACTIVE" ? <MarkListingSoldButton listingId={listing.id} /> : null}
+                <DeleteListingButton listingId={listing.id} listingTitle={listing.title} />
               </div>
             </div>
           </article>

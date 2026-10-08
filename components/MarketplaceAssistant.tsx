@@ -34,10 +34,21 @@ export default function MarketplaceAssistant() {
     setIsLoading(true);
 
     try {
+      const completedHistory = nextMessages.slice(1, -1);
+      let lastCompletedAssistantIndex = -1;
+      for (let index = 0; index < completedHistory.length; index += 1) {
+        if (completedHistory[index].role === "model") lastCompletedAssistantIndex = index;
+      }
+      const conversation = [
+        ...completedHistory.slice(0, lastCompletedAssistantIndex + 1),
+        nextMessages[nextMessages.length - 1],
+      ].slice(-12);
+      if (conversation[0]?.role === "model") conversation.shift();
+
       const response = await fetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages.slice(-12) }),
+        body: JSON.stringify({ messages: conversation }),
       });
       const result = await response.json() as { answer?: string; error?: string };
       if (!response.ok) {

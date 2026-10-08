@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { GraduationCap, SlidersHorizontal } from "lucide-react";
+import { GraduationCap, Search, SlidersHorizontal } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { formatListingAge } from "@/lib/listing-age";
 import WishlistButton from "@/components/WishlistButton";
@@ -10,6 +10,7 @@ import WishlistButton from "@/components/WishlistButton";
 type MarketplaceListing = {
   id: string;
   title: string;
+  description: string;
   price: number;
   category: string;
   imageUrls: string[];
@@ -22,13 +23,30 @@ export default function MarketplaceResults({
 }: {
   listings: MarketplaceListing[];
 }) {
-  const maximumPrice = Math.max(...listings.map((listing) => listing.price), 0);
+  const maximumPrice = Math.max(0, ...listings.map((listing) => listing.price));
   const [priceLimit, setPriceLimit] = useState(maximumPrice);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const visibleListings = listings.filter((listing) => listing.price <= priceLimit);
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const matchingListings = listings.filter((listing) =>
+    [listing.title, listing.description, listing.category]
+      .some((value) => value.toLowerCase().includes(normalizedQuery)),
+  );
+  const visibleListings = matchingListings.filter((listing) => listing.price <= priceLimit);
 
   return (
     <>
+      <label className="mb-6 flex w-full items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm lg:max-w-xl">
+        <Search aria-hidden="true" className="h-4 w-4 shrink-0 text-slate-400" />
+        <input
+          aria-label="Search listings"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Search laptops, books, bikes..."
+          className="w-full border-0 bg-transparent text-sm outline-none placeholder:text-slate-400"
+        />
+      </label>
+
       <section className="mb-8 rounded-[24px] border border-slate-200 bg-white/75 p-5 shadow-sm backdrop-blur-md">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 font-semibold text-slate-800">
@@ -42,7 +60,7 @@ export default function MarketplaceResults({
           type="range"
           min={0}
           max={maximumPrice || 1}
-          step={Math.max(100, Math.ceil(maximumPrice / 100))}
+          step="any"
           value={priceLimit}
           onChange={(event) => setPriceLimit(Number(event.target.value))}
           className="mt-4 h-2 w-full cursor-pointer appearance-none rounded-full bg-indigo-100 accent-indigo-700"
@@ -88,10 +106,19 @@ export default function MarketplaceResults({
             </article>
           ))}
         </div>
+      ) : normalizedQuery && matchingListings.length === 0 ? (
+        <div role="status" className="rounded-[24px] border border-slate-200 bg-white/75 p-10 text-center">
+          <h2 className="text-xl font-bold text-slate-900">We couldn’t find that item</h2>
+          <p className="mt-2 text-sm text-slate-600">The website currently doesn’t have this item. Please wait and check back later.</p>
+        </div>
       ) : (
         <div className="rounded-[24px] border border-slate-200 bg-white/75 p-10 text-center">
-          <h2 className="text-xl font-bold text-slate-900">No listings in this price range</h2>
-          <p className="mt-2 text-sm text-slate-600">Increase the maximum price to see more items.</p>
+          <h2 className="text-xl font-bold text-slate-900">
+            {normalizedQuery ? "No listings in this price range" : "No listings available"}
+          </h2>
+          <p className="mt-2 text-sm text-slate-600">
+            {normalizedQuery ? "Increase the maximum price to see more items." : "Check back later for new campus listings."}
+          </p>
         </div>
       )}
     </>

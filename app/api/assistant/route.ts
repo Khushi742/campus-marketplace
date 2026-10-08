@@ -34,8 +34,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Send up to 12 valid chat messages, each under 1,000 characters." }, { status: 400 });
   }
 
-  if (messages[messages.length - 1].role !== "user") {
-    return NextResponse.json({ error: "Your latest message must be from you." }, { status: 400 });
+  if (messages[0].role !== "user" || messages[messages.length - 1].role !== "user") {
+    return NextResponse.json({ error: "The conversation must start and end with your message." }, { status: 400 });
+  }
+  if (messages.some((message, index) => index > 0 && message.role === messages[index - 1].role)) {
+    return NextResponse.json({ error: "Conversation messages must alternate between you and the assistant." }, { status: 400 });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -78,7 +81,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "The assistant could not answer just now. Please try again." }, { status: 502 });
   }
 
-  const result: unknown = await geminiResponse.json();
+  let result: unknown;
+  try {
+    result = await geminiResponse.json();
+  } catch (error) {
+    console.error("Gemini API returned an invalid JSON response:", error);
+    return NextResponse.json({ error: "The assistant returned an invalid response. Please try again." }, { status: 502 });
+  }
   const candidates = (result as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }).candidates;
   const answer = candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("").trim();
 

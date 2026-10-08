@@ -52,6 +52,12 @@ Sign-in and account creation use Google OAuth; verification emails are not sent.
 
 The callback checks both Google's verified-email claim and the exact `@nmit.ac.in` domain; a Google account with another domain cannot create or sign into an account.
 
+## AI assistant
+
+The signed-in marketplace assistant uses Google's Gemini API. Set `GEMINI_API_KEY`
+in the server environment (including the Vercel project environment) and optionally
+set `GEMINI_MODEL`; it defaults to `gemini-2.5-flash`. Keep the API key server-only.
+
 ## Marketplace listings and seller ratings
 
 Marketplace, seller dashboard, listing details, profile, and wishlist entries use

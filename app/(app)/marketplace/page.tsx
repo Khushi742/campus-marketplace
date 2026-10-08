@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Search } from "lucide-react";
 import { categories } from "@/lib/sample-data";
 import MarketplaceResults from "./MarketplaceResults";
 import { getPrisma } from "@/lib/db";
@@ -20,19 +19,16 @@ export default async function MarketplacePage({
     },
     orderBy: { createdAt: "desc" },
   });
+  const maximumPrice = Math.max(0, ...filteredListings.map((listing) => listing.price));
 
   return (
     <div className="container-shell py-12">
-      <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mb-8">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-indigo-600">Marketplace</p>
           <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-900">
             {activeCategory ? `${activeCategory} listings` : "Browse campus listings"}
           </h1>
-        </div>
-        <div className="flex w-full max-w-xl items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-          <Search className="h-4 w-4 text-slate-400" />
-          <input aria-label="Search listings" placeholder="Search laptops, books, bikes..." className="w-full border-0 bg-transparent text-sm outline-none placeholder:text-slate-400" />
         </div>
       </div>
 
@@ -56,7 +52,7 @@ export default async function MarketplacePage({
         ))}
       </nav>
 
-      <MarketplaceResults key={activeCategory ?? "all"} listings={filteredListings.map((listing) => ({
+      <MarketplaceResults key={`${activeCategory ?? "all"}-${maximumPrice}`} listings={filteredListings.map((listing) => ({
         ...listing,
         createdAt: listing.createdAt.toISOString(),
       }))} />

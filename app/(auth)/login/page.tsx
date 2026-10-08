@@ -7,7 +7,7 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   const errorNotice = params.error === "AccessDenied"
-    ? "Use a verified Google account ending in @nmit.ac.in."
+    ? "Please use your verified college Google account ending in @nmit.ac.in."
     : params.error
       ? "Google sign-in could not be completed. Please try again."
       : undefined;
